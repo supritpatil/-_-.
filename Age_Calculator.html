@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input.error {
+            border-color: red;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Age Calculator</h1>
+        <label for="day">Day:</label>
+        <input type="number" id="day" placeholder="Enter day" min="1" max="31" required>
+        
+        <label for="month">Month:</label>
+        <input type="number" id="month" placeholder="Enter month" min="1" max="12" required>
+        
+        <label for="year">Year:</label>
+        <input type="number" id="year" placeholder="Enter year" min="1900" required>
+        
+        <button onclick="calculateAge()">Calculate Age</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Function to check if the year is a leap year
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        // Function to validate the number of days in a given month and year
+        function isValidDate(day, month, year) {
+            let daysInMonth;
+
+            switch (month) {
+                case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+                    daysInMonth = 31;
+                    break;
+                case 4: case 6: case 9: case 11:
+                    daysInMonth = 30;
+                    break;
+                case 2:
+                    daysInMonth = isLeapYear(year) ? 29 : 28;
+                    break;
+                default:
+                    return false; // Invalid month
+            }
+
+            return day > 0 && day <= daysInMonth;
+        }
+
+        // Function to highlight the input field in red if it's invalid
+        function highlightField(field, invalid) {
+            if (invalid) {
+                field.classList.add('error');
+            } else {
+                field.classList.remove('error');
+            }
+        }
+
+        function calculateAge() {
+            let dayField = document.getElementById('day');
+            let monthField = document.getElementById('month');
+            let yearField = document.getElementById('year');
+
+            let day = parseInt(dayField.value);
+            let month = parseInt(monthField.value);
+            let year = parseInt(yearField.value);
+
+            let valid = true;
+
+            // Validate the month
+            if (month < 1 || month > 12) {
+                alert("Please enter a valid month.");
+                highlightField(monthField, true);
+                valid = false;
+            } else {
+                highlightField(monthField, false);
+            }
+
+            // Validate the day based on the month and year
+            if (!isValidDate(day, month, year)) {
+                alert("Please enter a valid day for the selected month.");
+                highlightField(dayField, true);
+                valid = false;
+            } else {
+                highlightField(dayField, false);
+            }
+
+            // Validate the year (ensure it's a realistic year)
+            if (year < 1900 || year > new Date().getFullYear()) {
+                alert("Please enter a valid year.");
+                highlightField(yearField, true);
+                valid = false;
+            } else {
+                highlightField(yearField, false);
+            }
+
+            // If any of the fields are invalid, stop here
+            if (!valid) {
+                return;
+            }
+
+            // Create the birth date from the input
+            let birthDate = new Date(year, month - 1, day);  // JS months are 0-indexed (Jan = 0, Feb = 1, ...)
+            let today = new Date();
+
+            // Calculate the difference in years
+            let ageYears = today.getFullYear() - birthDate.getFullYear();
+            let ageMonths = today.getMonth() - birthDate.getMonth();
+            let ageDays = today.getDate() - birthDate.getDate();
+
+            // Adjust if the birthday hasn't occurred yet this year
+            if (ageMonths < 0 || (ageMonths === 0 && ageDays < 0)) {
+                ageYears--;
+                ageMonths += 12;
+            }
+
+            // Adjust days if necessary (i.e., if days are negative)
+            if (ageDays < 0) {
+                // Get the number of days in the previous month
+                let previousMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                ageDays += previousMonth.getDate();
+                ageMonths--;
+            }
+
+            // Display the result
+            document.getElementById('result').innerHTML = 
+                `Your age is: ${ageYears} years, ${ageMonths} months, and ${ageDays} days.`;
+        }
+    </script>
+
+</body>
+</html>
